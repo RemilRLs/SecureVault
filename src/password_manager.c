@@ -96,6 +96,38 @@ void add_password(PasswordNode** head, const char* domain, const char* login, co
     current->next = new_node;
 }
 
+// I need that to keep the date of the password when I add it/load it.
+void add_password_with_dates(PasswordNode** head, const char* domain, const char* login, const char* password, const char* comment, struct tm dateAdded, struct tm dateEdit) {
+    PasswordNode* new_node = (PasswordNode*)malloc(sizeof(PasswordNode));
+
+    if (new_node == NULL) {
+        fprintf(stderr, "[!] - Error allocating memory for new password node.\n");
+        return;
+    }
+
+    new_node->id = get_id_number(*head);
+    strncpy(new_node->domain, domain, DOMAIN_SIZE);
+    strncpy(new_node->login, login, LOGIN_SIZE);
+    strncpy(new_node->password, password, PASSWORD_SIZE);
+    strncpy(new_node->comment, comment, COMMENT_SIZE);
+    new_node->dateAdded = dateAdded;
+    new_node->dateEdit = dateEdit;
+    new_node->next = NULL;
+
+    if (*head == NULL) {
+        *head = new_node;
+        return;
+    }
+
+    PasswordNode* current = *head;
+
+    while (current->next != NULL) {
+        current = current->next;
+    }
+    current->next = new_node;
+}
+
+
 void display_passwords(const PasswordNode* head) {
     if (head == NULL) {
         fprintf(stderr, "[!] - No password to display.\n");
@@ -437,7 +469,7 @@ void load_passwords_from_binary(PasswordNode** head, const char* filepath, const
         memcpy(&dateEdit, plaintext_buffer + offset, sizeof(struct tm));
         offset += sizeof(struct tm);
 
-        add_password(head, domain, login, password, comment);
+        add_password_with_dates(head, domain, login, password, comment, dateAdded, dateEdit);
     }
 
     free(ciphertext_buffer);
@@ -739,15 +771,23 @@ void modify_node(PasswordNode *head){
 }
 
 // Method to export the password manager list to a CSV file.
-void export_passwordnode_csv(PasswordNode *head, const char* fileName) {
+void export_passwordnode_csv(PasswordNode *head, const char* authenticated_username) {
     PasswordNode* current = head;
 
-    FILE *file = open_file(fileName, "w");
+    char file_path_refacto[FILE_PATH_SIZE];
 
-    if(file == NULL) {
-        fprintf(stderr, "[X] - Error opening file for exportation.\n");
+    snprintf(file_path_refacto, FILE_PATH_SIZE, "%s%s.csv", CSV_EXPORT_FILE_PREFIX, authenticated_username);
+	printf("[DEBUG] - Final file path: %s\n", file_path_refacto);
+
+
+    FILE *file = open_file(file_path_refacto, "w");
+
+    if (file == NULL) {
+        fprintf(stderr, "[X] - Error opening file for writing CSV data.\n");
+        perror("[X] - fopen");
         return;
     }
+
 
     fprintf(file, "ID,Domaine,Login,Mot de passe,Commentaire,Added Date, Edit Date\n");
 
@@ -766,6 +806,58 @@ void export_passwordnode_csv(PasswordNode *head, const char* fileName) {
 
     close_file(file);
     printf("[*] - List of Passwords exported in CSV\n\n");
+}
+
+void import_passwordnode_csv(PasswordNode **head, const char* authenticated_username){
+    char file_path_refacto[FILE_PATH_SIZE];
+    char line[2048];
+
+    snprintf(file_path_refacto, FILE_PATH_SIZE, "%s%s.csv", CSV_EXPORT_FILE_PREFIX, authenticated_username);
+
+    FILE* file = fopen(file_path_refacto, "r");
+    if (file == NULL) {
+        fprintf(stderr, "[X] - Error opening CSV file for import.\n");
+        return;
+    }
+
+    // I do this because I don't want the first line.
+
+    if (fgets(line, sizeof(line), file) == NULL) {
+        fprintf(stderr, "[X] - Error reading first line of CSV file.\n");
+        fclose(file);
+        return;
+    }
+
+    // Here what I do is that I read every line of the CSV file.
+    while (fgets(line, sizeof(line), file) != NULL) {
+       unsigned int id;
+       char domain[DOMAIN_SIZE];
+       char login[LOGIN_SIZE];
+       char password[PASSWORD_SIZE];
+       char comment[COMMENT_SIZE];
+
+       char dateAddedStr[80], dateEditStr[80];
+       struct tm dateAdded;
+       struct tm dateEdit;
+
+       // I'm going to read each column until I get met a ',' and I put the data inside the variables.
+       // The last one %s is for the last column so there is no ',' at the end so I read until the end of the line.
+
+        if (sscanf(line, "%u,%[^,],%[^,],%[^,],%[^,],%[^,],%[^\n]", &id, domain, login, password, comment, dateAddedStr, dateEditStr) != 7) {
+            fprintf(stderr, "[X] - Error reading line from CSV file.\n");
+            continue;
+        }
+
+       // https://www.ibm.com/docs/fr/i/7.5?topic=functions-strptime-convert-string-datetime
+
+       strptime(dateAddedStr, "%Y-%m-%d %H:%M:%S", &dateAdded);
+       strptime(dateEditStr, "%Y-%m-%d %H:%M:%S", &dateEdit);
+
+       add_password_with_dates(head, domain, login, password, comment, dateAdded, dateEdit);
+    }
+
+    close_file(file);
+
 }
 
 void new_password_node(PasswordNode **head, const char* file_path, const unsigned char* key, const unsigned char* iv) {

@@ -62,7 +62,11 @@ int main(){
                 display_passwords(head);
                 break;
             case 6:
-                export_passwordnode_csv(head, CSV_EXPORT_FILE);
+                export_passwordnode_csv(head, authenticated_username);
+                break;
+            case 7:
+                import_passwordnode_csv(&head, authenticated_username);
+                save_passwords_to_binary(head, file_name, key, iv);
                 break;
             case 8:
                 save_passwords_to_binary(head, file_name, key, iv);

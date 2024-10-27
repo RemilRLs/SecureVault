@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+
 #include <time.h>
 
 #include "auth.h"
@@ -20,7 +21,9 @@
 #define COMMENT_SIZE 255
 #define PLAIN_TEXT_BUFFER_SIZE 2048
 
-#define CSV_EXPORT_FILE "/data/password_manager/CSV/passwords.csv"
+#define CSV_EXPORT_FILE_PREFIX "./data/password_manager/CSV/passwords_"
+
+
 
 typedef struct PasswordNode {
     unsigned int id;
@@ -49,11 +52,13 @@ void modify_node(PasswordNode *head);
 PasswordNode* search_by_id(PasswordNode* head, unsigned int id);
 PasswordNode* search_by_domain(PasswordNode* head, const char* domain);
 PasswordNode* search_by_login(PasswordNode* head, const char* login);
-void export_passwordnode_csv(PasswordNode *head, const char* fileName);
+void export_passwordnode_csv(PasswordNode *head, const char* authenticated_username);
+void import_passwordnode_csv(PasswordNode **head, const char* authenticated_username);
 void setup_user_password_file(const char* authenticated_username, unsigned char* iv);
 void save_passwords_to_binary(PasswordNode* head, const char* filepath, const unsigned char* key, const unsigned char* iv);
 void load_passwords_from_binary(PasswordNode** head, const char* filepath, const unsigned char* key,  unsigned char* iv);
 void new_password_node(PasswordNode **head, const char* file_path, const unsigned char* key, const unsigned char* iv);
 char* prompt_domain();
+char *strptime(const char *buf, const char *format, struct tm *tm); // I don't know why but I needed to declare manually this function to transform a string to a tm struct.
 
 #endif //PASSWORD_MANAGER_H
