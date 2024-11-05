@@ -16,10 +16,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="03a9ed58-444a-4d90-bd64-ea63bbaee09d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/main" beforeDir="false" afterPath="$PROJECT_DIR$/main" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/password_manager.o" beforeDir="false" afterPath="$PROJECT_DIR$/obj/password_manager.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/file.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/file.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/password_manager.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/password_manager.c" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -112,7 +109,7 @@
       <option name="presentableId" value="Default" />
       <updated>1730745406771</updated>
       <workItem from="1730745408199" duration="4000" />
-      <workItem from="1730746838645" duration="9202000" />
+      <workItem from="1730746838645" duration="12862000" />
     </task>
     <servers />
   </component>
