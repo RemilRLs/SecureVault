@@ -2,6 +2,14 @@
 
 #include "encryption.h"
 
+/**
+* Hash the input using SHA1.
+*
+* @param input The input to hash
+* @param inputSize The size of the input
+* @param output The output buffer where the hash will be stored
+* @param outputSize The size of the output buffer
+*/
 void sha1_hash(const char* input, unsigned int inputSize, unsigned char* output, unsigned int* outputSize)
 {
     EVP_MD_CTX *ctx = EVP_MD_CTX_new();
@@ -30,9 +38,19 @@ void sha1_hash(const char* input, unsigned int inputSize, unsigned char* output,
     EVP_MD_CTX_free(ctx);
 }
 
-// Encrypt the plaintext using the key and iv.
+/**
+* Cipher the input using AES.
+*
+* @param plaintext The input to cipher
+* @param plaintext_len The size of the input
+* @param key The key used to cipher the input
+* @param iv The initialization vector used to cipher the input
+* @param ciphertext The output buffer where the ciphered input will be stored
+* @return The size of the ciphered input
+*/
 int aes_encrypt(const unsigned char* plaintext, int plaintext_len, unsigned char* key, unsigned char* iv, unsigned char* ciphertext)
 {
+    // Encrypt the plaintext using the key and iv.
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     int len, ciphertext_len;
 
@@ -63,9 +81,19 @@ int aes_encrypt(const unsigned char* plaintext, int plaintext_len, unsigned char
     return ciphertext_len;
 }
 
-// Decrypt the ciphertext using the key and iv.
+/**
+* Decipher the input using AES.
+*
+* @param ciphertext The input to decipher
+* @param ciphertext_len The size of the input
+* @param key The key used to decipher the input
+* @param iv The initialization vector used to decipher the input
+* @param plaintext The output buffer where the deciphered input will be stored
+* @return The size of the deciphered input
+*/
 int aes_decrypt(const unsigned char* ciphertext, int ciphertext_len, unsigned char* key, unsigned char* iv, unsigned char* plaintext)
 {
+    // Decrypt the ciphertext using the key and iv.
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     int len, plaintext_len;
 
