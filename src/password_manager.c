@@ -2,6 +2,12 @@
 
 #include "password_manager.h"
 
+/**
+* Create a password node
+*
+* @param authenticated_username The authenticated username
+* @param iv Buffer that contain the IV
+*/
 void setup_user_password_file(const char* authenticated_username, unsigned char* iv) {
     char file_path[FILE_PATH_SIZE];
     generate_password_file_path(authenticated_username, file_path);
@@ -55,6 +61,16 @@ void setup_user_password_file(const char* authenticated_username, unsigned char*
     close_file(file);
 }
 
+/**
+* Allocate memory for a new password node and initialize it with the provided data
+*
+* @param head Head of the linked list of the password manager of the user
+* @param domain Domain link to the password
+* @param login Login link to the password
+* @param password Password
+* @param comment Comment of the node
+* @return The new password node
+*/
 PasswordNode* create_password_node(PasswordNode* head, const char* domain, const char* login, const char* password, const char* comment) {
     PasswordNode* new_node = (PasswordNode*)malloc(sizeof(PasswordNode));
     if (new_node == NULL) {
@@ -76,6 +92,15 @@ PasswordNode* create_password_node(PasswordNode* head, const char* domain, const
     return new_node;
 }
 
+/**
+* Add a password node to the linked list of the password manager of the user (I add it at the end)
+*
+* @param head Head of the linked list of the password manager of the user
+* @param domain Domain link to the password
+* @param login Login link to the password
+* @param password Password
+* @param comment Comment of the node
+*/
 void add_password(PasswordNode** head, const char* domain, const char* login, const char* password, const char* comment) {
     PasswordNode* new_node = create_password_node(*head, domain, login, password, comment);
     if (new_node == NULL) {
@@ -96,8 +121,19 @@ void add_password(PasswordNode** head, const char* domain, const char* login, co
     current->next = new_node;
 }
 
-// I need that to keep the date of the password when I add it/load it.
+/**
+* Add a password node to the linked list with specific dates like creation and last edit (for modification)
+*
+* @param head Head of the linked list of the password manager of the user
+* @param domain Domain link to the password
+* @param login Login link to the password
+* @param password Password
+* @param comment Comment of the node
+* @param dateAdded Date of the creation of the password
+* @param dateEdit Date of the last edit of the password
+*/
 void add_password_with_dates(PasswordNode** head, const char* domain, const char* login, const char* password, const char* comment, struct tm dateAdded, struct tm dateEdit) {
+    // I need that to keep the date of the password when I add it/load it.
     PasswordNode* new_node = (PasswordNode*)malloc(sizeof(PasswordNode));
 
     if (new_node == NULL) {
@@ -127,7 +163,11 @@ void add_password_with_dates(PasswordNode** head, const char* domain, const char
     current->next = new_node;
 }
 
-
+/**
+* Display all the passwords of the user (I go through the linked list and display each node)
+*
+* @param head Head of the linked list of the password manager of the user that I want to display
+*/
 void display_passwords(const PasswordNode* head) {
     if (head == NULL) {
         fprintf(stderr, "[!] - No password to display.\n");
@@ -158,8 +198,13 @@ void display_passwords(const PasswordNode* head) {
     }
 }
 
-// Method to print a specific node.
+/**
+* Display a specific node of the password manager of the user
+*
+* @param node The node to display
+*/
 void display_specific_node(PasswordNode* node){
+    // Method to print a specific node.
     char dateAdded[80];
     char dateEdit[80];
 
@@ -176,6 +221,11 @@ void display_specific_node(PasswordNode* node){
 
 }
 
+/**
+* Delete a password node from the linked list with the choice of the user (by ID or domain)
+*
+* @param head Head of the linked list of the password manager of the user
+*/
 void delete_password(PasswordNode** head) {
 
     printf("[?] - Delete by 'id' or 'domain': ");
@@ -235,8 +285,13 @@ void delete_password(PasswordNode** head) {
     }
 }
 
-// Method to delete a node inside the password manager list of a user.
+/**
+* Free the memory of each node of the linked list.
+*
+* @param head Head of the linked list of the password manager of the user
+*/
 void free_password_list(PasswordNode* head) {
+    // Method to delete a node inside the password manager list of a user.
     PasswordNode* current = head;
 
     while (current != NULL) {
@@ -246,6 +301,14 @@ void free_password_list(PasswordNode* head) {
     }
 }
 
+/**
+* Save the linked chain and cipher it with AES in a binary file
+*
+* @param head Head of the linked list of the password manager of the user
+* @param filepath Path of the file where the data will be saved
+* @param key Key used to encrypt the data
+* @param iv Initialization vector used to encrypt the data
+*/
 void save_passwords_to_binary(PasswordNode* head, const char* filepath, const unsigned char* key, const unsigned char* iv) {
 
     size_t bufferSize = PLAIN_TEXT_BUFFER_SIZE;
@@ -361,7 +424,14 @@ cleanup:
     free(ciphertext_buffer);
 }
 
-
+/**
+* Load the linked chain from a binary file and decrypt it with AES to charge it in memory
+*
+* @param head Head of the linked list of the password manager of the user
+* @param filepath Path of the file where the data will be loaded
+* @param key Key used to decrypt the data
+* @param iv Initialization vector used to decrypt the data
+*/
 void load_passwords_from_binary(PasswordNode** head, const char* filepath, const unsigned char* key, unsigned char* iv) {
     size_t plain_text_size = 0;
     FILE *file = open_file(filepath, "rb");
@@ -498,8 +568,14 @@ void load_passwords_from_binary(PasswordNode** head, const char* filepath, const
 }
 
 
-// Method to get ID.
+/**
+* Method to go through the linked chain to determine the number of the next ID
+*
+* @param head Head of the linked list of the password manager of the user
+* @return The number of the next ID
+*/
 unsigned int get_id_number(PasswordNode *head) {
+    // Method to get ID.
     unsigned int id;
     int count = 1;
 
@@ -513,6 +589,11 @@ unsigned int get_id_number(PasswordNode *head) {
     return id;
 }
 
+/**
+* Method to generate a random password
+*
+* @return The generated password
+*/
 char* generate_aleatory_passwd(){
     // https://www.ibm.com/docs/fr/i/7.5?topic=functions-sscanf-read-data
 
@@ -592,6 +673,11 @@ char* generate_aleatory_passwd(){
     return password;
 }
 
+/**
+* Method to search a password by ID, domain or login
+*
+* @param head Head of the linked list of the password manager of the user
+*/
 void search_node_password(PasswordNode* head) {
     PasswordNode* result_node = NULL;
 
@@ -638,8 +724,15 @@ void search_node_password(PasswordNode* head) {
 
 }
 
-// Method to search by id.
+/**
+* Method to search by ID a node.
+*
+* @param head Head of the linked list of the password manager of the user
+* @param id ID of the node to search
+* @return The node found or NULL if not found
+*/
 PasswordNode* search_by_id(PasswordNode* head, unsigned int id){
+    // Method to search by id.
     PasswordNode* current = head;
 
     while(current != NULL) {
@@ -655,8 +748,15 @@ PasswordNode* search_by_id(PasswordNode* head, unsigned int id){
     return NULL;
 }
 
-// Method to search by domain.
+/**
+* Method to search by domain a node.
+*
+* @param head Head of the linked list of the password manager of the user
+* @param domain Domain of the node to search
+* @return The node found or NULL if not found
+*/
 PasswordNode* search_by_domain(PasswordNode* head, const char* domain){
+    // Method to search by domain.
     PasswordNode* current = head;
 
     while(current != NULL) {
@@ -671,8 +771,15 @@ PasswordNode* search_by_domain(PasswordNode* head, const char* domain){
     return NULL;
 }
 
-// Method to search by login.
+/**
+* Method to search by login a node.
+*
+* @param head Head of the linked list of the password manager of the user
+* @param login Login of the node to search
+* @return The node found or NULL if not found
+*/
 PasswordNode* search_by_login(PasswordNode* head, const char* login){
+    // Method to search by login.
     PasswordNode* current = head;
 
     while(current != NULL) {
@@ -688,8 +795,13 @@ PasswordNode* search_by_login(PasswordNode* head, const char* login){
     return NULL;
 }
 
-// Method to modify a node by id, domain or login.
+/**
+* Method to modify a node by ID, domain or login then update the node like domain, login, password, comment.
+*
+* @param head Head of the linked list of the password manager of the user
+*/
 void modify_node(PasswordNode *head){
+    // Method to modify a node by id, domain or login.
     PasswordNode* result_node = NULL;
     printf("[?] - Do you want to modify by 'id', 'domain', 'login': ");
 
@@ -789,8 +901,14 @@ void modify_node(PasswordNode *head){
     }
 }
 
-// Method to export the password manager list to a CSV file.
+/**
+* Method that go through the linked list and export the data in a CSV file.
+*
+* @param head Head of the linked list of the password manager of the user
+* @param authenticated_username Username of the user.
+*/
 void export_passwordnode_csv(PasswordNode *head, const char* authenticated_username) {
+    // Method to export the password manager list to a CSV file.
     PasswordNode* current = head;
 
     char file_path_refacto[FILE_PATH_SIZE];
@@ -827,6 +945,12 @@ void export_passwordnode_csv(PasswordNode *head, const char* authenticated_usern
     printf("[*] - List of Passwords exported in CSV\n\n");
 }
 
+/**
+* Method to read each line of the CSV file and add it to the linked list.
+*
+* @param head Head of the linked list of the password manager of the user
+* @param authenticated_username Username of the user.
+*/
 void import_passwordnode_csv(PasswordNode **head, const char* authenticated_username){
     char file_path_refacto[FILE_PATH_SIZE];
     char line[2048];
@@ -879,6 +1003,14 @@ void import_passwordnode_csv(PasswordNode **head, const char* authenticated_user
 
 }
 
+/**
+* Method to create a node with data entered by the user and add it to the linked list.
+*
+* @param head Head of the linked list of the password manager of the user
+* @param file_path Path of the file where the data will be saved
+* @param key Key used to encrypt the data
+* @param iv Initialization vector used to encrypt the data
+*/
 void new_password_node(PasswordNode **head, const char* file_path, const unsigned char* key, const unsigned char* iv) {
     char domain[DOMAIN_SIZE];
     char login[LOGIN_SIZE];
@@ -932,7 +1064,11 @@ void new_password_node(PasswordNode **head, const char* file_path, const unsigne
     save_passwords_to_binary(*head, file_path, key, iv);
 }
 
-
+/**
+* Calculate the number of days between two dates (for expiration password date 90 days default and recommanded by ANSSI)
+*
+* @param date_modification Date of the modification of the password (node)
+*/
 int calculate_days_between_two_dates(struct tm date_modification) {
     time_t now = time(NULL);
     struct tm *current_date = localtime(&now);
@@ -945,6 +1081,11 @@ int calculate_days_between_two_dates(struct tm date_modification) {
     return difference / NUMBER_SECOND_IN_A_DAY;
 }
 
+/**
+* Method to ask the user for the domain.
+*
+* @return The domain entered by the user
+*/
 char* prompt_domain() {
     static char domain[DOMAIN_SIZE];
     printf("[*] - Enter the domain: ");
