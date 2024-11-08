@@ -43,6 +43,7 @@ int close_file(FILE* file) {
 */
 long get_size_file(const char* filename) {
     // Function to get the size of a file.
+    printf("filename: %s\n", filename);
     FILE *file = open_file(filename, "rb");
 
     if (file == NULL) {
@@ -52,5 +53,9 @@ long get_size_file(const char* filename) {
 
     fseek(file, 0, SEEK_END); // I go to the end of the file with indicator SEEK_END.
 
-    return ftell(file);
+    long size = ftell(file);
+
+    close_file(file);
+
+    return size;
 }
